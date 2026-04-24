@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Trolling Log"/>
+<meta name="theme-color" content="#0a1628"/>
+<title>Trolling Log</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:wght@300;400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --navy:#0a1628;--deep:#0d1f3c;--steel:#1a3a5c;--foam:#4a8ab5;
+  --gold:#c8922a;--amber:#e8a83a;--cream:#e8dcc8;--muted:#8a9ab0;
+  --red:#c0392b;--green:#27ae60;
+}
+html,body{height:100%;overflow:hidden;background:var(--navy)}
+body{font-family:'Source Serif 4',Georgia,serif;color:var(--cream);overscroll-behavior:none}
+.app{
+  max-width:430px;margin:0 auto;height:100%;
+  display:flex;flex-direction:column;
+  background:var(--navy);position:relative;overflow:hidden;
+}
+.bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 80%,rgba(30,80,128,.3) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(30,80,128,.2) 0%,transparent 50%),
+             linear-gradient(180deg,#0a1628 0%,#0d1f3c 40%,#0e2240 100%);
+  pointer-events:none;z-index:0;
+}
+.hdr{
+  padding:env(safe-area-inset-top,18px) 20px 14px;
+  padding-top:calc(env(safe-area-inset-top,0px) + 18px);
+  border-bottom:1px solid rgba(74,138,181,.2);
+  background:rgba(10,22,40,.96);position:relative;z-index:10;flex-shrink:0;
+}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.logo{font-family:'Bebas Neue',Impact,sans-serif;font-size:28px;letter-spacing:3px;color:var(--amber)}
+.logo span{color:var(--foam)}
+.status{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.dot.on{background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.wx{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+.offline-banner{background:rgba(192,57,43,.2);border-bottom:1px solid rgba(192,57,43,.3);padding:6px 20px;font-size:12px;color:var(--red);letter-spacing:.5px;text-align:center;display:none;flex-shrink:0}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;z-index:1;padding-bottom:80px}
+.sec{padding:20px}
+.sec-title{
+  font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;letter-spacing:2px;
+  color:var(--foam);margin-bottom:16px;display:flex;align-items:center;gap:10px;
+}
+.sec-title::after{content:'';flex:1;height:1px;background:rgba(74,138,181,.2)}
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 20px;border:none;border-radius:8px;
+  font-family:'Bebas Neue',Impact,sans-serif;font-size:16px;letter-spacing:2px;
+  cursor:pointer;transition:all .15s;width:100%;
+  -webkit-user-select:none;user-select:none;
+}
+.btn:active{transform:scale(.97)}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:active{background:var(--amber)}
+.btn-red{background:rgba(192,57,43,.15);color:var(--red);border:1px solid rgba(192,57,43,.35)}
+.btn-red:active{background:rgba(192,57,43,.25)}
+.btn-ghost{background:rgba(74,138,181,.1);color:var(--foam);border:1px solid rgba(74,138,181,.3)}
+.btn-ghost:active{background:rgba(74,138,181,.2)}
+.row{display:flex;gap:10px}.row .btn{flex:1}
+.grid{display:flex;flex-direction:column;gap:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld label{font-family:'Bebas Neue',Impact,sans-serif;font-size:13px;letter-spacing:1.5px;color:var(--muted)}
+.fld input,.fld select,.fld textarea{
+  background:rgba(26,58,92,.4);border:1px solid rgba(74,138,181,.25);
+  border-radius:8px;padding:11px 12px;color:var(--cream);
+  font-family:'Source Serif 4',Georgia,serif;font-size:16px;width:100%;
+  -webkit-appearance:none;appearance:none;
+}
+.fld input:focus,.fld select:focus,.fld textarea:focus{
+  outline:none;border-color:var(--foam);background:rgba(26,58,92,.6);
+}
+.fld select option{background:var(--deep);color:var(--cream)}
+.fld input::placeholder,.fld textarea::placeholder{color:var(--muted);opacity:.5}
+.fld textarea{resize:none;line-height:1.5}
+.cards{display:flex;flex-direction:column;gap:12px}
+.card{
+  background:rgba(26,58,92,.3);border:1px solid rgba(74,138,181,.2);
+  border-radius:10px;padding:14px;position:relative;overflow:hidden;
+}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold)}
+.card-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.fish-name{font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;color:var(--amber);letter-spacing:1px}
+.fish-time{font-size:11px;color:var(--muted);letter-spacing:1px}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.sval{font-family:'Bebas Neue',Impact,sans-serif;font-size:18px;color:var(--cream);line-height:1;text-align:center}
+.slbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;text-align:center}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{background:rgba(74,138,181,.15);border:1px solid rgba(74,138,181,.2);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--muted)}
+.xbtn{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:6px;line-height:1}
+.xbtn:active{color:var(--red)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-ico{font-size:52px;margin-bottom:12px}
+.empty-txt{font-size:14px;line-height:1.7}
+.toast{
+  position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 88px);
+  left:50%;transform:translateX(-50%);
+  background:var(--green);color:#fff;
+  padding:10px 24px;border-radius:50px;
+  font-family:'Bebas Neue',Impact,sans-serif;letter-spacing:1px;font-size:15px;
+  z-index:400;white-space:nowrap;
+  animation:tin .3s ease;pointer-events:none;
+}
+@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.nav{
+  display:flex;background:rgba(10,22,40,.98);
+  border-top:1px solid rgba(74,138,181,.2);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  position:relative;z-index:10;flex-shrink:0;
+}
+.nbtn{
+  flex:1;padding:11px 8px;background:none;border:none;color:var(--muted);
+  cursor:pointer;font-family:'Bebas Neue',Impact,sans-serif;font-size:12px;letter-spacing:1px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.nbtn.on{color:var(--amber)}
+.nicon{font-size:22px;line-height:1}
+/* MODAL */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
+  z-index:200;display:flex;align-items:flex-end;
+}
+.modal{
+  background:var(--deep);border-top:2px solid var(--gold);
+  border-radius:16px 16px 0 0;width:100%;max-width:430px;margin:0 auto;
+  max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:24px 20px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 24px);
+}
+.modal-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;color:var(--amber);letter-spacing:2px;margin-bottom:20px;text-align:center}
+/* VOICE */
+.voice-screen{display:flex;flex-direction:column;align-items:center;padding:20px 0;text-align:center}
+.mic-ring{
+  width:110px;height:110px;border-radius:50%;
+  background:rgba(26,58,92,.5);border:3px solid var(--foam);
+  display:flex;align-items:center;justify-content:center;
+  font-size:48px;margin-bottom:22px;cursor:pointer;
+  transition:all .2s;flex-shrink:0;
+}
+.mic-ring.active{background:rgba(192,57,43,.15);border-color:var(--red);animation:ripple 1.2s infinite}
+@keyframes ripple{0%{box-shadow:0 0 0 0 rgba(192,57,43,.4)}70%{box-shadow:0 0 0 22px rgba(192,57,43,0)}100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}}
+.voice-label{font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;letter-spacing:2px;color:var(--cream);margin-bottom:8px}
+.voice-hint{font-size:12px;color:var(--muted);line-height:1.6;max-width:280px;margin-bottom:18px}
+.tx-live{
+  background:rgba(26,58,92,.3);border:1px solid rgba(74,138,181,.2);
+  border-radius:8px;padding:12px;font-size:14px;color:var(--cream);
+  line-height:1.6;width:100%;min-height:52px;font-style:italic;margin-bottom:16px;text-align:left;
+}
+.tx-live.empty{color:var(--muted)}
+/* SHORTHAND */
+.shorthand-box{
+  background:rgba(200,146,42,.08);border:1px solid rgba(200,146,42,.25);
+  border-radius:8px;padding:14px;margin-bottom:16px;
+}
+.shorthand-title{font-family:'Bebas Neue',Impact,sans-serif;font-size:14px;letter-spacing:1.5px;color:var(--gold);margin-bottom:8px}
+.shorthand-hint{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5}
+.parsed-preview{
+  display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:24px;
+}
+/* DETAIL */
+.dov{position:fixed;inset:0;background:var(--navy);z-index:150;display:flex;flex-direction:column}
+.dhdr{
+  padding:env(safe-area-inset-top,16px) 20px 16px;
+  padding-top:calc(env(safe-area-inset-top,0px) + 16px);
+  background:rgba(10,22,40,.95);border-bottom:1px solid rgba(74,138,181,.2);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.dscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:40px}
+.back{background:none;border:none;color:var(--foam);font-size:26px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0}
+.dtitle{font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;color:var(--amber);letter-spacing:2px}
+.sbox{margin:16px 20px;background:rgba(26,58,92,.3);border:1px solid rgba(200,146,42,.25);border-radius:10px;padding:16px}
+.trip-row{background:rgba(26,58,92,.25);border:1px solid rgba(74,138,181,.15);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;margin-bottom:10px}
+.trip-row:active{background:rgba(26,58,92,.45)}
+.trip-top{display:flex;justify-content:space-between;align-items:center}
+.tdate{font-family:'Bebas Neue',Impact,sans-serif;font-size:18px;color:var(--cream);letter-spacing:1px}
+.tcount{font-family:'Bebas Neue',Impact,sans-serif;font-size:15px;color:var(--gold)}
+.tmeta{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.hi{color:var(--amber)}
+.mono{font-size:11px;font-family:monospace;color:var(--muted)}
+/* INSTALL BANNER */
+.install-banner{
+  background:rgba(200,146,42,.12);border-bottom:1px solid rgba(200,146,42,.25);
+  padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.install-txt{font-size:12px;color:var(--cream);flex:1;line-height:1.4}
+.install-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:2px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="bg"></div>
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="logo">TROLLING<span> LOG</span></div>
+      <div class="status">
+        <div class="dot" id="status-dot"></div>
+        <span id="status-txt">No Active Trip</span>
+      </div>
+    </div>
+    <div class="wx" id="wx-bar" style="display:none"></div>
+  </div>
+
+  <!-- OFFLINE BANNER -->
+  <div class="offline-banner" id="offline-banner">⚡ Offline — catches still save locally</div>
+
+  <!-- INSTALL BANNER (iOS) -->
+  <div class="install-banner" id="install-banner" style="display:none">
+    <span class="install-txt">📲 Add to Home Screen: tap <strong>Share</strong> → <strong>Add to Home Screen</strong> for the full app experience</span>
+    <button class="install-close" onclick="dismissInstall()">✕</button>
+  </div>
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="scroll" id="main-scroll">
+    <div id="tab-content"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="nav">
+    <button class="nbtn on" id="nb-trip" onclick="setTab('trip')"><span class="nicon">🚤</span>Trip</button>
+    <button class="nbtn" id="nb-log" onclick="setTab('log')"><span class="nicon">📋</span>Log</button>
+    <button class="nbtn" id="nb-history" onclick="setTab('history')"><span class="nicon">📖</span>History</button>
+  </div>
+</div>
+
+<!-- MODAL AREA (outside app for z-index) -->
+<div id="overlay-area"></div>
+<div id="toast-area"></div>
+
+<!-- DETAIL VIEW -->
+<div id="detail-view" style="display:none" class="dov"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────
+const FISH = ["Walleye","Salmon (King)","Salmon (Coho)","Salmon (Pink)","Salmon (Atlantic)","Lake Trout","Brown Trout","Rainbow Trout","Steelhead","Smallmouth Bass","Largemouth Bass","Northern Pike","Muskie","Perch","Bluegill","Crappie","Catfish","Other"];
+const LURES = ["Spoon","Plug","Stick Bait","Spinner","Fly","Jig","Crawler Harness","Cut Bait","Other"];
+const COLORS = ["Chrome/Silver","Gold","Blue/Silver","Green/Silver","Orange/Gold","Pink","White","Black","Natural/Perch","Chartreuse","Purple","Red/White","Other"];
+const RODS = ["Downrigger","Diver","Leadcore","Weighted Steel","Copper","Mono","Braid"];
+const LEADERS = ["Fluorocarbon","Monofilament","Wire","None"];
+
+const DB = {
+  get(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch{return null}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+};
+
+let state = {
+  tab: 'trip',
+  activeTrip: null,
+  catches: [],
+  pastTrips: [],
+  catchMode: null,
+  form: blankCatch(),
+  listening: false,
+  transcript: '',
+  shorthand: '',
+  detail: null,
+};
+
+let recRef = null, txLive = '';
+
+function blankCatch() {
+  return {
+    id: Date.now(),
+    time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+    fish:'',weight:'',depth:'',waterDepth:'',lat:'',lng:'',
+    lureType:'',lureColor:'',rodType:'',leaderLength:'',leaderType:''
+  };
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+function init() {
+  state.activeTrip = DB.get('tlog_trip');
+  state.catches = DB.get('tlog_catches') || [];
+  state.pastTrips = DB.get('tlog_history') || [];
+  if (state.activeTrip) {
+    // restore wx display
+  }
+
+  // offline detection
+  window.addEventListener('online', () => { document.getElementById('offline-banner').style.display = 'none'; });
+  window.addEventListener('offline', () => { document.getElementById('offline-banner').style.display = 'block'; });
+  if (!navigator.onLine) document.getElementById('offline-banner').style.display = 'block';
+
+  // iOS install hint
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone;
+  if (isIOS && !isStandalone && !DB.get('install_dismissed')) {
+    document.getElementById('install-banner').style.display = 'flex';
+  }
+
+  render();
+}
+
+function dismissInstall() {
+  DB.set('install_dismissed', true);
+  document.getElementById('install-banner').style.display = 'none';
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function setTab(t) { state.tab = t; render(); }
+
+function render() {
+  const {activeTrip, catches} = state;
+
+  // header
+  document.getElementById('status-dot').className = 'dot' + (activeTrip ? ' on' : '');
+  document.getElementById('status-txt').textContent = activeTrip ? 'Trip Active' : 'No Active Trip';
+  const wx = activeTrip?.weather;
+  const loc = activeTrip?.location;
+  const wxBar = document.getElementById('wx-bar');
+  if (wx) {
+    wxBar.style.display = 'flex';
+    wxBar.innerHTML = `<span>🌡 ${wx.temp}°F</span><span>💨 ${wx.wind}mph ${compass(wx.windDir)}</span><span>☁ ${wx.cond}</span>${loc ? `<span class="mono">📍 ${loc.lat}, ${loc.lng}</span>` : ''}`;
+  } else { wxBar.style.display = 'none'; }
+
+  // nav
+  ['trip','log','history'].forEach(id => {
+    document.getElementById('nb-'+id).className = 'nbtn' + (state.tab===id ? ' on' : '');
+  });
+
+  document.getElementById('tab-content').innerHTML = renderTab();
+  document.getElementById('overlay-area').innerHTML = renderOverlay();
+
+  const dv = document.getElementById('detail-view');
+  if (state.detail) { dv.style.display = 'flex'; dv.innerHTML = renderDetail(); }
+  else { dv.style.display = 'none'; }
+}
+
+function renderTab() {
+  const {tab, activeTrip, catches} = state;
+  const tw = catches.reduce((s,c)=>s+(parseFloat(c.weight)||0),0);
+  const bw = catches.length ? Math.max(...catches.map(c=>parseFloat(c.weight)||0)) : 0;
+
+  if (tab === 'trip') {
+    if (!activeTrip) return `
+      <div class="sec">
+        <div class="empty" style="padding-top:60px">
+          <div class="empty-ico">🎣</div>
+          <div class="empty-txt">Ready to hit the water?<br/>Start a new trip to begin logging your catches.</div>
+        </div>
+        <div style="margin-top:32px">
+          <button class="btn btn-gold" onclick="startTrip()">🚤 Start New Trip</button>
+        </div>
+      </div>`;
+    return `
+      <div class="sec">
+        <div class="sec-title">Active Trip</div>
+        <div class="card" style="margin-bottom:20px">
+          <div style="margin-bottom:12px;color:var(--muted);font-size:13px">
+            Started ${new Date(activeTrip.startTime).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})} · ${activeTrip.date}
+          </div>
+          <div class="stats3">
+            <div><div class="sval hi">${catches.length}</div><div class="slbl">Fish</div></div>
+            <div><div class="sval">${tw.toFixed(1)}</div><div class="slbl">Lbs Total</div></div>
+            <div><div class="sval">${bw>0?bw.toFixed(1):'—'}</div><div class="slbl">Best (lbs)</div></div>
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:12px">
+          <button class="btn btn-ghost" onclick="setTab('log')">📋 View Log</button>
+          <button class="btn btn-gold" onclick="openCatch()">＋ Log Catch</button>
+        </div>
+        <button class="btn btn-red" onclick="endTrip()">🏁 End Trip &amp; Save</button>
+      </div>`;
+  }
+
+  if (tab === 'log') {
+    const cards = catches.map(c => catchCard(c, true)).join('');
+    return `
+      <div class="sec">
+        <div class="sec-title">Today's Catches</div>
+        ${activeTrip ? `<button class="btn btn-gold" style="margin-bottom:16px" onclick="openCatch()">＋ Log a Catch</button>` : ''}
+        ${catches.length === 0
+          ? `<div class="empty"><div class="empty-ico">🐟</div><div class="empty-txt">No catches logged yet.<br/>Tap "Log a Catch" to record your first fish!</div></div>`
+          : `<div class="cards">${cards}</div>`}
+      </div>`;
+  }
+
+  if (tab === 'history') {
+    if (!state.pastTrips.length) return `
+      <div class="sec">
+        <div class="sec-title">Past Trips</div>
+        <div class="empty"><div class="empty-ico">📖</div><div class="empty-txt">No trips yet.<br/>Complete a trip to see your history here.</div></div>
+      </div>`;
+    const rows = state.pastTrips.map((t,i) => {
+      const tc = t.catches||[];
+      const tw2 = tc.reduce((s,c)=>s+(parseFloat(c.weight)||0),0);
+      return `<div class="trip-row" onclick="showDetail(${i})">
+        <div class="trip-top">
+          <div class="tdate">${t.date}</div>
+          <div class="tcount">${tc.length} fish · ${tw2.toFixed(1)} lbs</div>
+        </div>
+        <div class="tmeta">${t.weather ? `${t.weather.temp}°F · ${t.weather.cond} · ${t.weather.wind}mph` : 'Weather unavailable'}${t.location ? ` · ${t.location.lat}, ${t.location.lng}` : ''}</div>
+      </div>`;
+    }).join('');
+    return `<div class="sec"><div class="sec-title">Past Trips</div>${rows}</div>`;
+  }
+  return '';
+}
+
+function catchCard(c, deletable) {
+  return `<div class="card">
+    ${deletable ? `<button class="xbtn" onclick="delCatch(${c.id})">✕</button>` : ''}
+    <div class="card-hdr"><div class="fish-name">${c.fish||'Unknown'}</div><div class="fish-time">${c.time}</div></div>
+    <div class="stats3">
+      <div><div class="sval">${c.weight||'—'}</div><div class="slbl">lbs</div></div>
+      <div><div class="sval">${c.depth||'—'}</div><div class="slbl">ft deep</div></div>
+      <div><div class="sval">${c.waterDepth||'—'}</div><div class="slbl">water ft</div></div>
+    </div>
+    <div class="tags">
+      ${c.rodType?`<span class="tag">🎣 ${c.rodType}</span>`:''}
+      ${c.lureType?`<span class="tag">🪝 ${c.lureType}${c.lureColor?' · '+c.lureColor:''}</span>`:''}
+      ${c.leaderType?`<span class="tag">🪢 ${c.leaderLength?c.leaderLength+'" ':''}${c.leaderType}</span>`:''}
+      ${c.lat?`<span class="tag mono">📍 ${c.lat}, ${c.lng}</span>`:''}
+    </div>
+  </div>`;
+}
+
+function renderOverlay() {
+  const {catchMode, listening, transcript, shorthand, form} = state;
+  if (!catchMode) return '';
+
+  if (catchMode === 'choose') {
+    return `<div class="overlay">
+      <div class="modal">
+        <div class="modal-title">＋ Log a Catch</div>
+        <div class="grid" style="margin-top:8px">
+          <button class="btn btn-gold" style="font-size:18px;padding:18px" onclick="openVoice()">🎤 &nbsp; Speak Your Catch</button>
+          <button class="btn btn-ghost" style="font-size:18px;padding:18px" onclick="openShorthand()">⌨️ &nbsp; Type Shorthand</button>
+          <button class="btn btn-ghost" style="font-size:18px;padding:18px" onclick="setCatchMode('form')">📝 &nbsp; Fill Form</button>
+          <button class="btn btn-red" style="margin-top:4px" onclick="cancelCatch()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (catchMode === 'voice') {
+    return `<div class="overlay">
+      <div class="modal">
+        <div class="modal-title">🎤 Describe Your Catch</div>
+        <div class="voice-screen">
+          <div class="mic-ring ${listening?'active':''}" onclick="${listening?'stopListening()':'beginListening()'}">🎤</div>
+          <div class="voice-label">${listening?'Listening…':'Tap mic to speak'}</div>
+          <div class="voice-hint">
+            Try: <em>"4 pound walleye, 30 feet down, water 50 feet, downrigger, gold spoon, fluorocarbon"</em>
+          </div>
+          <div class="tx-live ${transcript?'':'empty'}">${transcript||'Your words will appear here…'}</div>
+          <div class="row" style="width:100%">
+            <button class="btn btn-ghost" onclick="cancelCatch()">Cancel</button>
+            <button class="btn btn-gold" onclick="voiceDone()">${listening?'Done — Review':'Review &amp; Save'}</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (catchMode === 'shorthand') {
+    const parsed = parseVoice(shorthand);
+    const tags = Object.entries(parsed).filter(([,v])=>v).map(([k,v])=>`<span class="tag">${k}: ${v}</span>`).join('');
+    return `<div class="overlay">
+      <div class="modal">
+        <div class="modal-title">⌨️ Quick Entry</div>
+        <div class="shorthand-box">
+          <div class="shorthand-title">Type Your Catch</div>
+          <div class="shorthand-hint">e.g. "3lb coho, 25 down, water 40, downrigger, gold spoon, 48 inch fluorocarbon"</div>
+          <textarea id="sh-input" rows="3" placeholder="Describe your catch…" oninput="updShorthand(this.value)">${shorthand}</textarea>
+          <div class="parsed-preview">${tags||'<span style="font-size:12px;color:var(--muted)">Parsed fields will appear here…</span>'}</div>
+        </div>
+        <div class="row">
+          <button class="btn btn-ghost" onclick="cancelCatch()">Cancel</button>
+          <button class="btn btn-gold" onclick="applyShorthand()">Review &amp; Save</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (catchMode === 'form') {
+    const fishOpts = FISH.map(f=>`<option value="${f}"${form.fish===f?' selected':''}>${f}</option>`).join('');
+    const lureOpts = LURES.map(l=>`<option value="${l}"${form.lureType===l?' selected':''}>${l}</option>`).join('');
+    const colorOpts = COLORS.map(c=>`<option value="${c}"${form.lureColor===c?' selected':''}>${c}</option>`).join('');
+    const rodOpts = RODS.map(r=>`<option value="${r}"${form.rodType===r?' selected':''}>${r}</option>`).join('');
+    const leadOpts = LEADERS.map(l=>`<option value="${l}"${form.leaderType===l?' selected':''}>${l}</option>`).join('');
+    return `<div class="overlay" onclick="bgCancel(event)">
+      <div class="modal">
+        <div class="modal-title">✏️ Review &amp; Save</div>
+        ${transcript ? `<div style="background:rgba(26,58,92,.3);border:1px solid rgba(74,138,181,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted);font-style:italic;margin-bottom:16px;line-height:1.5">"${transcript}"</div>` : ''}
+        <div class="grid">
+          <div class="fld">
+            <label>Fish Type *</label>
+            <select onchange="updForm('fish',this.value)"><option value="">Select fish…</option>${fishOpts}</select>
+          </div>
+          <div class="grid2">
+            <div class="fld">
+              <label>Weight (lbs)</label>
+              <input type="number" inputmode="decimal" step="0.1" placeholder="e.g. 3.5" value="${form.weight}" oninput="updForm('weight',this.value)"/>
+            </div>
+            <div class="fld">
+              <label>Time Caught</label>
+              <input type="time" value="${form.time}" oninput="updForm('time',this.value)"/>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="fld">
+              <label>Depth Caught (ft)</label>
+              <input type="number" inputmode="numeric" placeholder="e.g. 28" value="${form.depth}" oninput="updForm('depth',this.value)"/>
+            </div>
+            <div class="fld">
+              <label>Water Depth (ft)</label>
+              <input type="number" inputmode="numeric" placeholder="e.g. 45" value="${form.waterDepth}" oninput="updForm('waterDepth',this.value)"/>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="fld">
+              <label>Latitude</label>
+              <input type="text" inputmode="decimal" placeholder="auto" value="${form.lat}" oninput="updForm('lat',this.value)"/>
+            </div>
+            <div class="fld">
+              <label>Longitude</label>
+              <input type="text" inputmode="decimal" placeholder="auto" value="${form.lng}" oninput="updForm('lng',this.value)"/>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="fld">
+              <label>Lure Type</label>
+              <select onchange="updForm('lureType',this.value)"><option value="">Select…</option>${lureOpts}</select>
+            </div>
+            <div class="fld">
+              <label>Lure Color</label>
+              <select onchange="updForm('lureColor',this.value)"><option value="">Select…</option>${colorOpts}</select>
+            </div>
+          </div>
+          <div class="fld">
+            <label>Rod Type</label>
+            <select onchange="updForm('rodType',this.value)"><option value="">Select…</option>${rodOpts}</select>
+          </div>
+          <div class="grid2">
+            <div class="fld">
+              <label>Leader Length (in)</label>
+              <input type="number" inputmode="numeric" placeholder="e.g. 48" value="${form.leaderLength}" oninput="updForm('leaderLength',this.value)"/>
+            </div>
+            <div class="fld">
+              <label>Leader Type</label>
+              <select onchange="updForm('leaderType',this.value)"><option value="">Select…</option>${leadOpts}</select>
+            </div>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn btn-ghost" onclick="setCatchMode('choose')">← Back</button>
+            <button class="btn btn-gold" onclick="saveCatch()">Save Catch ✓</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+  return '';
+}
+
+function renderDetail() {
+  const t = state.detail; if (!t) return '';
+  const tc = t.catches||[];
+  const dtw = tc.reduce((s,c)=>s+(parseFloat(c.weight)||0),0);
+  const dbw = tc.length ? Math.max(...tc.map(c=>parseFloat(c.weight)||0)) : 0;
+  const cards = tc.map(c => catchCard(c, false)).join('');
+  return `
+    <div class="dhdr">
+      <button class="back" onclick="closeDetail()">←</button>
+      <div class="dtitle">${t.date}</div>
+    </div>
+    <div class="dscroll">
+      ${t.weather ? `<div class="wx" style="padding:12px 20px 0">
+        <span>🌡 ${t.weather.temp}°F</span>
+        <span>💨 ${t.weather.wind}mph ${compass(t.weather.windDir)}</span>
+        <span>☁ ${t.weather.cond}</span>
+        ${t.location ? `<span class="mono">📍 ${t.location.lat}, ${t.location.lng}</span>` : ''}
+      </div>` : ''}
+      <div class="sbox">
+        <div class="stats3">
+          <div><div class="sval hi">${tc.length}</div><div class="slbl">Fish</div></div>
+          <div><div class="sval">${dtw.toFixed(1)}</div><div class="slbl">Lbs Total</div></div>
+          <div><div class="sval">${dbw.toFixed(1)}</div><div class="slbl">Best (lbs)</div></div>
+        </div>
+      </div>
+      <div style="padding:0 20px 40px">
+        <div class="sec-title">Catches</div>
+        ${tc.length === 0
+          ? '<div class="empty"><div class="empty-txt">No catches on this trip.</div></div>'
+          : `<div class="cards">${cards}</div>`}
+      </div>
+    </div>`;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function compass(d) { return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8]; }
+
+let toastTimer;
+function showToast(msg) {
+  clearTimeout(toastTimer);
+  const el = document.getElementById('toast-area');
+  el.innerHTML = `<div class="toast">${msg}</div>`;
+  toastTimer = setTimeout(() => el.innerHTML = '', 2500);
+}
+
+function getGPS() {
+  return new Promise(res => {
+    if (!navigator.geolocation) return res(null);
+    navigator.geolocation.getCurrentPosition(
+      p => res({ lat: p.coords.latitude.toFixed(5), lng: p.coords.longitude.toFixed(5) }),
+      () => res(null), { timeout: 8000, maximumAge: 60000 }
+    );
+  });
+}
+
+async function fetchWeather(lat, lng) {
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`);
+    const d = await r.json(); const c = d.current;
+    const w = c.weather_code;
+    const cond = w===0?'Clear':w<=3?'Partly Cloudy':w<=48?'Foggy':w<=67?'Rain':w<=77?'Snow':w<=82?'Showers':'Stormy';
+    return { temp: Math.round(c.temperature_2m), wind: Math.round(c.wind_speed_10m), windDir: c.wind_direction_10m, cond };
+  } catch { return null; }
+}
+
+// ── TRIP ──────────────────────────────────────────────────────
+async function startTrip() {
+  showToast('📍 Locating…');
+  const loc = await getGPS();
+  const wx = (loc && navigator.onLine) ? await fetchWeather(loc.lat, loc.lng) : null;
+  const trip = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}),
+    startTime: new Date().toISOString(),
+    location: loc, weather: wx
+  };
+  state.activeTrip = trip; state.catches = [];
+  DB.set('tlog_trip', trip); DB.set('tlog_catches', []);
+  showToast('Trip Started! 🎣');
+  state.tab = 'log'; render();
+}
+
+async function endTrip() {
+  if (!state.activeTrip) return;
+  const finished = { ...state.activeTrip, endTime: new Date().toISOString(), catches: state.catches };
+  state.pastTrips = [finished, ...state.pastTrips];
+  DB.set('tlog_history', state.pastTrips);
+  state.activeTrip = null; state.catches = [];
+  DB.set('tlog_trip', null); DB.set('tlog_catches', []);
+  showToast('Trip Saved! ✅');
+  state.tab = 'history'; render();
+}
+
+// ── CATCH FLOW ────────────────────────────────────────────────
+async function openCatch() {
+  const loc = await getGPS();
+  state.form = { ...blankCatch(), lat: loc?.lat||'', lng: loc?.lng||'' };
+  state.transcript = ''; state.shorthand = ''; txLive = '';
+  setCatchMode('choose');
+}
+
+function openVoice() { setCatchMode('voice'); }
+
+function openShorthand() { setCatchMode('shorthand'); }
+
+function setCatchMode(m) { state.catchMode = m; render(); }
+
+function cancelCatch() {
+  if (recRef) recRef.stop();
+  state.catchMode = null; state.transcript = ''; state.listening = false;
+  render();
+}
+
+function bgCancel(e) { if (e.target === e.currentTarget) cancelCatch(); }
+
+// ── VOICE ─────────────────────────────────────────────────────
+function beginListening() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('Voice not available — use type or form'); setCatchMode('shorthand'); return; }
+  const r = new SR();
+  r.lang = 'en-US'; r.continuous = false; r.interimResults = true;
+  r.onstart = () => { state.listening = true; render(); };
+  r.onresult = e => {
+    const t = Array.from(e.results).map(x => x[0].transcript).join(' ');
+    state.transcript = t; txLive = t; render();
+  };
+  r.onend = () => {
+    state.listening = false;
+    const parsed = parseVoice(txLive);
+    state.form = { ...state.form, ...parsed };
+    state.catchMode = 'form'; render();
+  };
+  r.onerror = () => { state.listening = false; state.catchMode = 'form'; render(); };
+  r.start(); recRef = r;
+}
+
+function stopListening() { if (recRef) recRef.stop(); }
+
+function voiceDone() {
+  if (state.listening && recRef) { recRef.stop(); }
+  else { const p = parseVoice(txLive); state.form = { ...state.form, ...p }; state.catchMode = 'form'; render(); }
+}
+
+// ── SHORTHAND ─────────────────────────────────────────────────
+function updShorthand(v) { state.shorthand = v; render(); }
+
+function applyShorthand() {
+  const parsed = parseVoice(state.shorthand);
+  state.form = { ...state.form, ...parsed };
+  state.catchMode = 'form'; render();
+}
+
+// ── PARSE ─────────────────────────────────────────────────────
+function parseVoice(text) {
+  if (!text) return {};
+  const t = text.toLowerCase(); const u = {};
+  for (const f of FISH) { const k = f.toLowerCase().replace(/[()]/g,'').split(' ')[0]; if (t.includes(k)) { u.fish = f; break; } }
+  const wt = t.match(/(\d+\.?\d*)\s*(pound|lb|lbs)/); if (wt) u.weight = wt[1];
+  const dep = t.match(/(\d+)\s*feet?\s*(deep|down|depth|running)/); if (dep) u.depth = dep[1];
+  const wat = t.match(/water\s*(?:was|is|depth)?\s*(\d+)|(\d+)\s*feet?\s*water/); if (wat) u.waterDepth = wat[1]||wat[2];
+  for (const rod of RODS) if (t.includes(rod.toLowerCase())) { u.rodType = rod; break; }
+  for (const lure of LURES) if (t.includes(lure.toLowerCase().split(' ')[0])) { u.lureType = lure; break; }
+  for (const col of COLORS) { const c = col.toLowerCase().split('/')[0].split(' ')[0]; if (c.length > 3 && t.includes(c)) { u.lureColor = col; break; } }
+  const ll = t.match(/(\d+)\s*inch(?:es?)?\s*leader/); if (ll) u.leaderLength = ll[1];
+  for (const lt of LEADERS) if (t.includes(lt.toLowerCase())) { u.leaderType = lt; break; }
+  return u;
+}
+
+// ── FORM ──────────────────────────────────────────────────────
+function updForm(k, v) { state.form = { ...state.form, [k]: v }; }
+
+async function saveCatch() {
+  if (!state.form.fish) { showToast('Select a fish type'); return; }
+  const updated = [...state.catches, { ...state.form, id: Date.now() }];
+  state.catches = updated; DB.set('tlog_catches', updated);
+  state.catchMode = null; state.transcript = '';
+  showToast('Catch Logged! 🐟'); render();
+}
+
+function delCatch(id) {
+  state.catches = state.catches.filter(c => c.id !== id);
+  DB.set('tlog_catches', state.catches); render();
+}
+
+// ── HISTORY ───────────────────────────────────────────────────
+function showDetail(i) { state.detail = state.pastTrips[i]; render(); }
+function closeDetail() { state.detail = null; render(); }
+
+// ── SERVICE WORKER (inline) ───────────────────────────────────
+if ('serviceWorker' in navigator) {
+  const swCode = `
+const CACHE = 'tlog-v1';
+const ASSETS = [location.href];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    fetch(e.request).then(r => {
+      const rc = r.clone();
+      caches.open(CACHE).then(c => c.put(e.request, rc));
+      return r;
+    }).catch(() => caches.match(e.request))
+  );
+});`;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+
+init();
+</script>
+</body>
+</html>
