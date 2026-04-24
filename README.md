@@ -1,1 +1,1 @@
-This is an iPhone app to log fishing catches to provide a permanent record of fishing trips for future use based on time of year, weather conditions and fish location.  I wanted to be voice activated to make input easier.
+This is an iPhone app to log fishing catches to provide a permanent record of fishing trips for future use based on time of year, weather conditions and fish location.  I wanted it to be voice activated to make input easier.
